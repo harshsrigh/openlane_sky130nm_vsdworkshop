@@ -2,6 +2,36 @@
 
 This repository used to document the progress of the 5-days workshop on Physical design using OpenLANE flow(an orchestra of open source tools put together to build/create an open source community of digital and analog IP's).
 
+- [OpenLANE Workshop](#openlane-workshop)
+  - [Day Progress & Learnings](#day-progress--learnings)
+  - [Day 1: Introduction to OpenLANE Flow](#day-1-introduction-to-openlane-flow)
+    - [Lab Work](#lab-work)
+      - [Invoking OpenLANE](#invoking-openlane)
+      - [Preparing Design](#preparing-design)
+      - [Running Synthesis](#running-synthesis)
+  - [Day 2: Floorplanning and Placement](#day-2-floorplanning-and-placement)
+    - [Floorplanning](#floorplanning)
+      - [Floorplan Control Parameters](#floorplan-control-parameters)
+      - [Decoupling Capacitor](#decoupling-capacitor)
+      - [Importance of Power Planning](#importance-of-power-planning)
+      - [Executing Floorplanning on openLANE](#executing-floorplanning-on-openlane)
+    - [Executing Placement on openLANE](#executing-placement-on-openlane)
+  - [Day 3: Standard Cell Analysis](#day-3-standard-cell-analysis)
+    - [View Cell in Magic](#view-cell-in-magic)
+    - [SPICE Extraction for Parasitic](#spice-extraction-for-parasitic)
+    - [Cell Transient Simulation using .spice file](#cell-transient-simulation-using-spice-file)
+  - [Day 4: Timing Analysis using OpenSTA and Clock Tree Synthesis](#day-4-timing-analysis-using-opensta-and-clock-tree-synthesis)
+    - [Cell Dimension Guide](#cell-dimension-guide)
+    - [Generate LEF file from Inverter .Mag file](#generate-lef-file-from-inverter-mag-file)
+    - [Process for Adding Custom Cell](#process-for-adding-custom-cell)
+      - [Next Step is to prepare the design with new config.tcl](#next-step-is-to-prepare-the-design-with-new-configtcl)
+      - [Checking the Custom Cell Inclusion](#checking-the-custom-cell-inclusion)
+    - [OpenSTA for Timing Analysis](#opensta-for-timing-analysis)
+      - [Setting up .conf file for STA](#setting-up-conf-file-for-sta)
+      - [Slack Violation](#slack-violation)
+    - [Performing Clock Tree Synthesis](#performing-clock-tree-synthesis)
+      - [Post CTS Analysis:](#post-cts-analysis)
+
 ## Day Progress & Learnings
 
 During the workshop, most of the labs are performed using a pre-coded picorv32a project.
@@ -72,7 +102,7 @@ Command to run magic:
 Floorplan result:                                                      
 ![floorplan Image](./images/floorplane.PNG "Floorplan result")
 
-#### Executing Placement on openLANE
+### Executing Placement on openLANE
 
 After Floorplan, next step(in physical design) is the placement stage. Standard cells has been mapped as per the synthesized netlist and their standard rows are determined by the floorplan.
 
@@ -95,8 +125,8 @@ File of interest in the cloned repo is sky130A_inv.mag file and to view the layo
 ### View Cell in Magic
 Run command `magic -T sky130A.tech sky130A_inv.mag &`
 
-### SPICE Extraction for Parasitics
-To extract the parasitics type following command on the magic terminal:
+### SPICE Extraction for Parasitic
+To extract the parasitic type following command on the magic terminal:
 ``` 
 % extract all
 % ext2spice cthresh 0 rthresh 0
@@ -119,7 +149,7 @@ In order to do transient simulation in ngspice following changes were made in th
 Spice file after all the changes:            
 ![](./images/netlist.PNG)
 
-Exceute Simulation using command: `ngspice sky130_inv.spice`
+Execute Simulation using command: `ngspice sky130_inv.spice`
 Followed by `ngspice-> plot y vs time a` in the ngspice command line.
 Results in following plot:             
 ![add_image](./images/sim_spice.PNG)
@@ -128,7 +158,7 @@ Results in following plot:
 
 ### Cell Dimension Guide
 
-Input and Output ports should be placed such that port should intersect the odd multiples of tracks pitch especially of the locali and metal layers. This dimension infomration is presented in the track.info file.       
+Input and Output ports should be placed such that port should intersect the odd multiples of tracks pitch especially of the locali and metal layers. This dimension information is presented in the track.info file.       
 ![](./images/trackinfo.PNG)
 
 As shown in the above image, li1 layer horizontal track has pitch of 0.46 and offset of 0.23. Here, the offset is half of pitch means tracks are centered around the origin.
@@ -136,7 +166,7 @@ As shown in the above image, li1 layer horizontal track has pitch of 0.46 and of
 Considering that add grid to magic using following command:
 `% grid 0.46um 0.34um 0.23um 0.17um`(`type grid help` in magic console for more information on grid command)
 
-Below image confirms that both A and Y lies on the odd mutiples of the track.          
+Below image confirms that both A and Y lies on the odd multiples of the track.          
 ![](./images/Intersect.PNG)
 
 Note: Magic could also be used to assign port using the option edit->text.       
@@ -150,7 +180,7 @@ Type `lef write` in the magic console window. This generates a .lef file in the 
 
 ### Process for Adding Custom Cell 
 
-Now to include a custom inverter cell into a openLANE flow, one needs to do cell characterisation using either GUNA or any closed source tools. This custom cell characterisation will provides liberty files that need to be included in the config.tcl of the project as shown below.(For this workshop these liberty files were provided by the vsd team)
+Now to include a custom inverter cell into a openLANE flow, one needs to do cell characterization using either GUNA or any closed source tools. This custom cell characterization will provides liberty files that need to be included in the config.tcl of the project as shown below.(For this workshop these liberty files were provided by the vsd team)
 ![](./images/new_config.PNG)
 
 #### Next Step is to prepare the design with new config.tcl
@@ -161,7 +191,7 @@ Last two commands were run to include the sky130_vsdinv.lef [More information on
 
 #### Checking the Custom Cell Inclusion
 
-Now, follow the OpenLANE flow like run_synthesis-> run_floorplan -> run_placement and confirm wheather custom cell is getting included inside the design flow.
+Now, follow the OpenLANE flow like run_synthesis-> run_floorplan -> run_placement and confirm weather custom cell is getting included inside the design flow.
 
 Result:
    1. After Synthesis: Total 1947 instance of sky130_vsdinv included in the netlist.                                  
@@ -170,15 +200,15 @@ Result:
       ![](./images/added_to_design.PNG)         
  
 ### OpenSTA for Timing Analysis
-Static Timing Analysis checks for the worst case propogation of all the possible paths for min/max delays. Hence, STA reports WNS(Worst negative slack) and TNS(Total negative slack). To debug the slack violations OpenSTA is used as it is integrated in OpenLANE flow.
+Static Timing Analysis checks for the worst case propagation of all the possible paths for min/max delays. Hence, STA reports WNS(Worst negative slack) and TNS(Total negative slack). To debug the slack violations OpenSTA is used as it is integrated in OpenLANE flow.
 
 File requirement:
    1. Configuration files (.conf)
-   2. Contraint files (.sdc)
+   2. Constraint files (.sdc)
 
 #### Setting up .conf file for STA
 This requires following files:
-   1. Contraint files(.sdc).
+   1. Constraint files(.sdc).
    2. min and max Liberty files
    3. Verilog file
    4. SPEF file (Optional)
@@ -187,12 +217,12 @@ After setting-up .conf file:
 ![](./images/conf_file.PNG)
 
 #### Slack Violation
-After running OpenSTA on the design with custom cell negative slack was oberserved(shown below)                
+After running OpenSTA on the design with custom cell negative slack was observed(shown below)                
 [](./images/SLACK_defination.PNG)
 
-This violation can be debugged inside the openSTA by replacing the small buffers with bigger buffers espacially for the nets where Funout is more than 4.
+This violation can be debugged inside the openSTA by replacing the small buffers with bigger buffers especially for the nets where Fanout is more than 4.
 
-### Perfomring Clock Tree Synthesis 
+### Performing Clock Tree Synthesis 
 After standard cell placement in OpenLANE, it's time to perform CTS which inserts the clock tree in the design.
 
 Run clock tree synthesis(CTS) in OpenLANE: `run_cts`
