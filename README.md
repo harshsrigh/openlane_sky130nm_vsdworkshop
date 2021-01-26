@@ -83,3 +83,55 @@ Placement in OpenLANE happens in two stages. First stage is the Global placement
 ![Placement Result](./images/placement_result.PNG "Legalization Pass result")                          
 Placement result on Magic:                                                                           
 ![Placement Image](./images/placement_image.PNG "Placement result on Magic")                 
+
+## Day 3: Standard Cell Analysis
+
+In this section of the workshop, a pre-build inverter was analyzed in the OpenLane flow using ngspice and magic PEX extraction to obtain .spice file of the inverter which further analyzed in the ngspice 31.
+
+To clone the cell use following command: `git clone https://github.com/nickson-jose/vsdstdcelldesign`
+
+File of interest in the cloned repo is sky130A_inv.mag file and to view the layout of the cell using Magic .tech file is required. Hence, copy the sky130A.tech file to this cloned repo as shown below:
+![](./images/file_vsdcell.PNG) 
+### View Cell in Magic
+Run command `magic -T sky130A.tech sky130A_inv.mag &`
+
+### SPICE Extraction for Parasitics
+To extract the parasitics type following command on the magic terminal:
+``` 
+% extract all
+% ext2spice cthresh 0 rthresh 0
+% ext2spice 
+```                             
+![](./images/extract_spice.PNG) 
+
+As shown in the above image this command will generate two files 'sky130_inv.ext' and 'sky130_inv.spice'.
+
+### Cell Transient Simulation using .spice file
+In order to do transient simulation in ngspice following changes were made in the file:
+   1. Add pshort.lib and nshort.lib files using '.include' statement.
+   2. As pshort.lib does not have any model by the name of pshort. Hence replace pshort with pshort_model.0. Also, replace nshort with nshort_model.0 for same reason.
+   3. Provide supplies using dc supplies to VA and VSS. 
+   4. Provide pulse signal to the port A.
+   5. Add simulation setup: .tran 1n 20n (1ns step and simulation time 20ns)
+   6. Change the scale to 0.01u
+   7. Add .control to perform run inside the same file.
+   
+Spice file after all the changes:            
+![](./images/netlist.PNG)
+
+Exceute Simulation using command: `ngspice sky130_inv.spice`
+Followed by `ngspice-> plot y vs time a` in the ngspice command line.
+Results in following plot:             
+![add_image](./images/sim_spice.PNG)
+
+## Day 4: Timing Analysis using OpenSTA and Clock Tree Synthesis
+
+### Cell Dimension Guide
+Input and Output ports should be placed such that port should intersect the odd multiples of track pitch especially of the locali and metal layers. This dimension infomration is presented in the LEF files. 
+
+Considering that add grid to magic using following command:
+`% grid 0.46um 0.34um 0.23um 0.17um`
+From below image, it is confirm that both A and Y lies on the odd mutiples of the track.
+![](./images/Intersect.PNG)
+
+As seen in the above image port A and Y, this label "A"
