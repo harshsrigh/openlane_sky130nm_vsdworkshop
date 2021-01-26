@@ -26,8 +26,8 @@ All the designs are kept at the `/openlane_working_dir/designs`. For the worksho
 
 The command used for setting up the design with 'LEF' and 'TECH' file. The 'LEF' file format contains information related to the terminals, different layers, dimensions etc, where Tech files contains layer definition and design rule checks(DRC).
 
-Set 'LIB_SYNTH' variable to the `./openlane_dir/pdks/sky130A/libs.ref/sky130_fd_sc_hd/lib/sky130_fd_sc_hd_tt_025C_1v80.lib`. This liberty file contains Standard cell characteristics for 25 Deg Celsius Temperature and 1.8V. Add this variable in the config.tcl file present in the picorv32a folder.
-![Preparation Image](./images/prep.png "Setting-up Design")
+Set 'LIB_SYNTH' variable to the `./openlane_dir/pdks/sky130A/libs.ref/sky130_fd_sc_hd/lib/sky130_fd_sc_hd_tt_025C_1v80.lib`. This liberty file contains Standard cell characteristics for 25 Deg Celsius Temperature and 1.8V. Add this variable in the config.tcl file present in the picorv32a folder.             
+![Preparation Image](./images/prep.png "Setting-up Design")             
 
 #### Running Synthesis
 Use command `run_synthesis`                                                                                               
@@ -80,6 +80,6 @@ Placement in OpenLANE happens in two stages. First stage is the Global placement
 
 ***Run Placement Command:*** `run_placement`                                                                                    
 ***Placement Result:***                                        
-![Placement Result](./images/placement_result.PNG "Legalization Pass result")
-Placement result on Magic:                                                         
-![Placement Image](./images/placement_image.PNG "Placement result on Magic")
+![Placement Result](./images/placement_result.PNG "Legalization Pass result")                          
+Placement result on Magic:                                                                           
+![Placement Image](./images/placement_image.PNG "Placement result on Magic")                 
