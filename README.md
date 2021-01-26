@@ -27,12 +27,12 @@ All the designs are kept at the `/openlane_working_dir/designs`. For the worksho
 The command used for setting up the design with 'LEF' and 'TECH' file. The 'LEF' file format contains information related to the terminals, different layers, dimensions etc, where Tech files contains layer definition and design rule checks(DRC).
 
 Set 'LIB_SYNTH' variable to the `./openlane_dir/pdks/sky130A/libs.ref/sky130_fd_sc_hd/lib/sky130_fd_sc_hd_tt_025C_1v80.lib`. This liberty file contains Standard cell characteristics for 25 Deg Celsius Temperature and 1.8V. Add this variable in the config.tcl file present in the picorv32a folder.
-![Preparation Image](./images/prep.PNG "Setting-up Design")
+![Preparation Image](./images/prep.png "Setting-up Design")
 
 #### Running Synthesis
-
-Use command `run_synthesis`.
-![run synthesis Image](./images/run_synth.PNG "Running for synthesis")
+Use command `run_synthesis`                                                                                               
+![run synthesis Image](./images/run_synth.PNG "Running for synthesis")                                                                      
+File resulted from the synthesis                                                                           
 ![run synthesis Image](./images/gen_synth.PNG "File resulted from the synthesis")
 
 ## Day 2: Floorplanning and Placement
@@ -60,7 +60,7 @@ For more control parameter refer to [openLANE configuration Readme](https://gith
 Run Command `run_floorplan` after adjusting proper control parameters in config.tcl.
 
 Command generates 'DEF' file in the folder `/designs/picorv32a/run/<setup-folder>/results/floorplan/`
-![run floorplan Image](./images/floorplan_folder.PNG "Floorplan file")
+![run floorplan Image](./images/floorplane_folder.PNG "Floorplan file")
 
 ***Viewing 'DEF' file using Magic***
 Magic requires three files to view Picorv32a DEF file:
@@ -69,7 +69,8 @@ Magic requires three files to view Picorv32a DEF file:
    3. DEF File: Any Def file generated using this LEF file
 Command to run magic:
 `magic -T <Tech File> lef read <LEF File> def read <DEF File> &`
-![floorplan Image](./images/floorplan.PNG "Floorplan result")
+Floorplan result:                                                      
+![floorplan Image](./images/floorplane.PNG "Floorplan result")
 
 #### Executing Placement on openLANE
 
@@ -77,8 +78,8 @@ After Floorplan, next step(in physical design) is the placement stage. Standard 
 
 Placement in OpenLANE happens in two stages. First stage is the Global placement in which placements of the cells are not legalized. Followed by Detailed Placement in which proper legalization is considered.
 
-***Run Placement Command:*** `run_placement`
-***Placement Result:***
+***Run Placement Command:*** `run_placement`                                                                                    
+***Placement Result:***                                        
 ![Placement Result](./images/placement_result.PNG "Legalization Pass result")
-
+Placement result on Magic:                                                         
 ![Placement Image](./images/placement_image.PNG "Placement result on Magic")
