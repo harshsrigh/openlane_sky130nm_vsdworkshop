@@ -127,6 +127,7 @@ Results in following plot:
 ## Day 4: Timing Analysis using OpenSTA and Clock Tree Synthesis
 
 ### Cell Dimension Guide
+
 Input and Output ports should be placed such that port should intersect the odd multiples of tracks pitch especially of the locali and metal layers. This dimension infomration is presented in the track.info file.       
 ![](./images/trackinfo.PNG)
 
@@ -141,19 +142,24 @@ Below image confirms that both A and Y lies on the odd mutiples of the track.
 Note: Magic could also be used to assign port using the option edit->text.       
 
 ### Generate LEF file from Inverter .Mag file
+
 After confirming that the I/O port of the inverter lies on the tracks, extract the LEF file which contains the abstract information of the cell.
 
 Type `lef write` in the magic console window. This generates a .lef file in the same directory.
 ![](./images/lef_inv.PNG)
 
 ### Process for Adding Custom Cell 
+
 Now to include a custom inverter cell into a openLANE flow, one needs to do cell characterisation using either GUNA or any closed source tools. This custom cell characterisation will provides liberty files that need to be included in the config.tcl of the project as shown below.(For this workshop these liberty files were provided by the vsd team)
 ![](./images/new_config.PNG)
 
-*** Next Step is to prepare the design with new config.tcl ***
+#### Next Step is to prepare the design with new config.tcl
+
 Use same command as shown on the day one with -overwrite tag to remove the past project files. This generates a new merged.lef(present in <design_folder>/run/<run_name>/tmp/merged.lef) with sky130_vsdinv cell defined inside it.
 ![](./images/loading_cell_into_merge.lef.PNG)
 Last two commands were run to include the sky130_vsdinv.lef [More information on Nickson Repo](https://github.com/nickson-jose/vsdstdcelldesign)
+
+#### Checking the Custom Cell Inclusion
 
 Now, follow the OpenLANE flow like run_synthesis-> run_floorplan -> run_placement and confirm wheather custom cell is getting included inside the design flow.
 
@@ -163,5 +169,38 @@ Result:
    2. After Placement: Properly aligned sky130_vsdinv cell shown below using magic.                                  
       ![](./images/added_to_design.PNG)         
  
+### OpenSTA for Timing Analysis
+Static Timing Analysis checks for the worst case propogation of all the possible paths for min/max delays. Hence, STA reports WNS(Worst negative slack) and TNS(Total negative slack). To debug the slack violations OpenSTA is used as it is integrated in OpenLANE flow.
 
+File requirement:
+   1. Configuration files (.conf)
+   2. Contraint files (.sdc)
+
+#### Setting up .conf file for STA
+This requires following files:
+   1. Contraint files(.sdc).
+   2. min and max Liberty files
+   3. Verilog file
+   4. SPEF file (Optional)
+
+After setting-up .conf file:                                             
+![](./images/conf_file.PNG)
+
+#### Slack Violation
+After running OpenSTA on the design with custom cell negative slack was oberserved(shown below)                
+[](./images/SLACK_defination.PNG)
+
+This violation can be debugged inside the openSTA by replacing the small buffers with bigger buffers espacially for the nets where Funout is more than 4.
+
+### Perfomring Clock Tree Synthesis 
+After standard cell placement in OpenLANE, it's time to perform CTS which inserts the clock tree in the design.
+
+Run clock tree synthesis(CTS) in OpenLANE: `run_cts`
+
+Note: CTS run will generate a new .v file with clock buffers.           
+![](./images/cts_run_netlist.PNG)
+
+#### Post CTS Analysis:
+Invoke magic using similar command as used in day two but change the DEF file with the file present in CTS folder instead of placement.                           
+![](./images/cts.def_result.PNG)
 
