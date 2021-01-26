@@ -127,11 +127,41 @@ Results in following plot:
 ## Day 4: Timing Analysis using OpenSTA and Clock Tree Synthesis
 
 ### Cell Dimension Guide
-Input and Output ports should be placed such that port should intersect the odd multiples of track pitch especially of the locali and metal layers. This dimension infomration is presented in the LEF files. 
+Input and Output ports should be placed such that port should intersect the odd multiples of tracks pitch especially of the locali and metal layers. This dimension infomration is presented in the track.info file.       
+![](./images/trackinfo.PNG)
+
+As shown in the above image, li1 layer horizontal track has pitch of 0.46 and offset of 0.23. Here, the offset is half of pitch means tracks are centered around the origin.
 
 Considering that add grid to magic using following command:
-`% grid 0.46um 0.34um 0.23um 0.17um`
-From below image, it is confirm that both A and Y lies on the odd mutiples of the track.
+`% grid 0.46um 0.34um 0.23um 0.17um`(`type grid help` in magic console for more information on grid command)
+
+Below image confirms that both A and Y lies on the odd mutiples of the track.          
 ![](./images/Intersect.PNG)
 
-As seen in the above image port A and Y, this label "A"
+Note: Magic could also be used to assign port using the option edit->text.       
+
+### Generate LEF file from Inverter .Mag file
+After confirming that the I/O port of the inverter lies on the tracks, extract the LEF file which contains the abstract information of the cell.
+
+Type `lef write` in the magic console window. This generates a .lef file in the same directory.
+![](./images/lef_inv.PNG)
+
+### Process for Adding Custom Cell 
+Now to include a custom inverter cell into a openLANE flow, one needs to do cell characterisation using either GUNA or any closed source tools. This custom cell characterisation will provides liberty files that need to be included in the config.tcl of the project as shown below.(For this workshop these liberty files were provided by the vsd team)
+![](./images/new_config.PNG)
+
+*** Next Step is to prepare the design with new config.tcl ***
+Use same command as shown on the day one with -overwrite tag to remove the past project files. This generates a new merged.lef(present in <design_folder>/run/<run_name>/tmp/merged.lef) with sky130_vsdinv cell defined inside it.
+![](./images/loading_cell_into_merge.lef.PNG)
+Last two commands were run to include the sky130_vsdinv.lef [More information on Nickson Repo](https://github.com/nickson-jose/vsdstdcelldesign)
+
+Now, follow the OpenLANE flow like run_synthesis-> run_floorplan -> run_placement and confirm wheather custom cell is getting included inside the design flow.
+
+Result:
+   1. After Synthesis: Total 1947 instance of sky130_vsdinv included in the netlist.                                  
+      ![](./images/included_into_synthesis.PNG)                
+   2. After Placement: Properly aligned sky130_vsdinv cell shown below using magic.                                  
+      ![](./images/added_to_design.PNG)         
+ 
+
+
