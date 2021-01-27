@@ -31,6 +31,16 @@ This repository used to document the progress of the 5-days workshop on Physical
       - [Slack Violation](#slack-violation)
     - [Performing Clock Tree Synthesis](#performing-clock-tree-synthesis)
       - [Post CTS Analysis:](#post-cts-analysis)
+  - [Day 5: RTS to GDSII Final Steps](#day-5-rts-to-gdsii-final-steps)
+    - [Generate PDN Network](#generate-pdn-network)
+    - [Routing in OpenLANE](#routing-in-openlane)
+    - [SPEF Extraction](#spef-extraction)
+      - [Inputs Required](#inputs-required)
+      - [SPEF Extraction Script Result](#spef-extraction-script-result)
+  - [Contact](#contact)
+  - [Acknowledgment](#acknowledgment)
+  - [References](#references)
+  - [For Installation of OpenLANE](#for-installation-of-openlane)
 
 ## Day Progress & Learnings
 
@@ -97,8 +107,10 @@ Magic requires three files to view Picorv32a DEF file:
    1. Magic Tech file: sky130A.tech
    2. LEF File: Merged.lef
    3. DEF File: Any Def file generated using this LEF file
+
 Command to run magic:
 `magic -T <Tech File> lef read <LEF File> def read <DEF File> &`
+
 Floorplan result:                                                      
 ![floorplan Image](./images/floorplane.PNG "Floorplan result")
 
@@ -108,8 +120,8 @@ After Floorplan, next step(in physical design) is the placement stage. Standard 
 
 Placement in OpenLANE happens in two stages. First stage is the Global placement in which placements of the cells are not legalized. Followed by Detailed Placement in which proper legalization is considered.
 
-***Run Placement Command:*** `run_placement`                                                                                    
-***Placement Result:***                                        
+***Run Placement Command:***  `run_placement`                                                                                    
+**Placement Legalization Pass :**                                        
 ![Placement Result](./images/placement_result.PNG "Legalization Pass result")                          
 Placement result on Magic:                                                                           
 ![Placement Image](./images/placement_image.PNG "Placement result on Magic")                 
@@ -164,12 +176,15 @@ Input and Output ports should be placed such that port should intersect the odd 
 As shown in the above image, li1 layer horizontal track has pitch of 0.46 and offset of 0.23. Here, the offset is half of pitch means tracks are centered around the origin.
 
 Considering that add grid to magic using following command:
-`% grid 0.46um 0.34um 0.23um 0.17um`(`type grid help` in magic console for more information on grid command)
+
+`% grid 0.46um 0.34um 0.23um 0.17um` 
+
+**Note**: type `grid help` in magic console for more information on grid command
 
 Below image confirms that both A and Y lies on the odd multiples of the track.          
 ![](./images/Intersect.PNG)
 
-Note: Magic could also be used to assign port using the option edit->text.       
+**Note**: Magic could also be used to assign port using the option edit->text.       
 
 ### Generate LEF file from Inverter .Mag file
 
@@ -233,4 +248,66 @@ Note: CTS run will generate a new .v file with clock buffers.
 #### Post CTS Analysis:
 Invoke magic using similar command as used in day two but change the DEF file with the file present in CTS folder instead of placement.                           
 ![](./images/cts.def_result.PNG)
+
+## Day 5: RTS to GDSII Final Steps
+
+As mentioned earlier that in openLANE flow Power distribution network is generated not in the floorplan but after the CTS generation. Hence, it's time to generate PDN network.
+
+### Generate PDN Network
+
+Run Command `gen_pdn`.
+
+Note: Make sure that the .def file env variable should be pointing to *cts.def file instead of placement def.        
+![](./images/check_def_after_CTS.PNG)        
+
+### Routing in OpenLANE
+
+Like any commercial tool OpenLANE also perform routing in two steps.
+
+   1. Global routing: This generates routing guides for the netlist while defining layers possible tracks in each guide. This routing is performed by tool named 'Fast Route'
+   2. Detail routing: This performs a exhaustive task in which TritonRoute iteratively route each interconnect using the routing guide generated in Global Route.
+
+**Note**: In Detail routing time/memory consumption could be controlled by using the 'ROUTING_STRATEGY' variable. 
+If this variable is set to 0 then it would be less optimized with few DRC violations but will be faster and consumes less time and memory whereas if 'ROUTING_STRATEGY' set to 14, it gives very optimized result with clean DRC but takes more time and memory.
+
+To Perform Routing run Command: `run_routing`
+![](./images/rounting_completed.PNG)
+
+Synthesis File generation while running routing:
+![](./images/final-synthesis_folder.PNG)
+Before performing routing, OpenLANE creates two verilog files as shown above: diodes.v and preroute.v 
+
+These files contains the diodes used to limit the Antenna generation for the longer nets.
+
+Result after routing:
+![](images/after_routing.PNG)
+
+### SPEF Extraction
+Once routing has been completed interconnect parasitics can be extracted to perform post-route STA analysis. The parasitics are extracted into a SPEF file. The SPEF extractor is not included within OpenLANE as of now. 
+
+Although a python module was provided by the VSD team for SPEF extraction. 
+(TODO: Add the repo link for the SPEF extraction module)
+
+#### Inputs Required 
+   * LEF File
+   *  DEF FIle
+   
+#### SPEF Extraction Script Result
+![](images/SPEF_extraction.PNG)
+
+## Contact
+
+Harsh Shukla - [hshukla3@asu.edu](hshukla3@asu.edu)
+
+## Acknowledgment
+* [Kunal Ghosh - Co-founder (VSD Corp. Pvt. Ltd)](https://github.com/kunalg123)
+* [Nickson Jose - VSD VLSI Engineer](https://github.com/nickson-jose)
+
+## References
+* [Efabless - OpenLANE repository](https://github.com/efabless/openlane)
+* [Vsdcell Design repository](https://github.com/nickson-jose/vsdstdcelldesign)
+
+## For Installation of OpenLANE
+* [OpenLANE Built Script (Recommended)](https://github.com/nickson-jose/openlane_build_script)
+* [Efabless - OpenLANE repository](https://github.com/efabless/openlane)
 
