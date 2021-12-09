@@ -297,7 +297,7 @@ Although a python module was provided by the VSD team for SPEF extraction.
 
 ## Contact
 
-Harsh Shukla - [hshukla3@asu.edu](hshukla3@asu.edu)
+Harsh Shukla - [Linkedin](https://www.linkedin.com/in/harsh-shukla96/)
 
 ## Acknowledgment
 * [Kunal Ghosh - Co-founder (VSD Corp. Pvt. Ltd)](https://github.com/kunalg123)
